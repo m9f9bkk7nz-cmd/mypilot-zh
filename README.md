@@ -1,95 +1,176 @@
-# MyPilot 自动驾驶硬件销售网站
+# Prisma Database Setup Guide
 
-MyPilot 是一个面向全球市场的自动驾驶硬件销售平台，提供比 comma.ai 和 koumma.ai 更优秀的用户体验。
+## Prerequisites
 
-## 技术栈
+Before running migrations, ensure you have:
 
-- **Frontend**: Next.js 14 (App Router), React 18, TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js
-- **Payment**: Stripe, PayPal, Alipay
-- **Deployment**: Vercel
-- **Internationalization**: next-intl (支持 en, zh-CN, zh-TW, ja, ko)
+1. **PostgreSQL installed and running**
+   - Install PostgreSQL 15+ on your system
+   - Create a database named `mypilot`
+   - Update the `DATABASE_URL` in your `.env` file with your credentials
 
-## 开发环境设置
+2. **Dependencies installed**
+   ```bash
+   npm install
+   ```
 
-1. 安装依赖:
+## Database Setup Steps
+
+### 1. Configure Database Connection
+
+Update your `.env` file with your PostgreSQL credentials:
+
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/mypilot"
+```
+
+Replace:
+- `username` with your PostgreSQL username
+- `password` with your PostgreSQL password
+- `localhost:5432` with your PostgreSQL host and port
+- `mypilot` with your database name
+
+### 2. Generate Initial Migration
+
+Run the following command to create the initial migration:
+
 ```bash
-npm install
+npm run prisma:migrate
 ```
 
-2. 配置环境变量:
+This will:
+- Create a new migration file in `prisma/migrations/`
+- Apply the migration to your database
+- Generate the Prisma Client
+
+When prompted, enter a name for the migration (e.g., "init" or "initial_schema")
+
+### 3. Generate Prisma Client
+
+If you need to regenerate the Prisma Client without running migrations:
+
 ```bash
-cp .env.example .env
-# 编辑 .env 文件，填入实际的配置值
+npm run prisma:generate
 ```
 
-3. 启动开发服务器:
+### 4. Verify Database Setup
+
+You can use Prisma Studio to visually inspect your database:
+
 ```bash
-npm run dev
+npm run prisma:studio
 ```
 
-4. 访问应用:
-打开浏览器访问 [http://localhost:3000](http://localhost:3000)
+This will open a browser window with Prisma Studio at http://localhost:5555
 
-## 可用脚本
+## Common Commands
 
-- `npm run dev` - 启动开发服务器
-- `npm run build` - 构建生产版本
-- `npm run start` - 启动生产服务器
-- `npm run lint` - 运行 ESLint 检查
-- `npm run format` - 使用 Prettier 格式化代码
-
-## 项目结构
-
-```
-mypilot-website/
-├── app/                    # Next.js App Router 目录
-│   ├── layout.tsx         # 根布局
-│   ├── page.tsx           # 首页
-│   └── globals.css        # 全局样式
-├── components/            # React 组件
-├── lib/                   # 工具函数和配置
-├── public/                # 静态资源
-├── .kiro/                 # Kiro 规范文档
-│   └── specs/
-│       └── mypilot-website/
-│           ├── requirements.md
-│           ├── design.md
-│           └── tasks.md
-├── .env.example           # 环境变量示例
-├── .eslintrc.json         # ESLint 配置
-├── .prettierrc            # Prettier 配置
-├── next.config.js         # Next.js 配置
-├── tailwind.config.ts     # Tailwind CSS 配置
-├── tsconfig.json          # TypeScript 配置
-└── package.json           # 项目依赖
-
+### Create a new migration
+```bash
+npm run prisma:migrate
 ```
 
-## 功能特性
+### Apply migrations in production
+```bash
+npx prisma migrate deploy
+```
 
-- ✅ 多语言支持 (en, zh-CN, zh-TW, ja, ko)
-- ✅ 多货币支持 (USD, EUR, CNY, JPY, KRW)
-- ✅ 产品展示与浏览
-- ✅ 购物车管理
-- ✅ 用户认证与账户管理
-- ✅ 订单处理与支付
-- ✅ 国际物流追踪
-- ✅ 产品评价系统
-- ✅ 管理后台
-- ✅ SEO 优化
-- ✅ 响应式设计
+### Reset database (WARNING: deletes all data)
+```bash
+npx prisma migrate reset
+```
 
-## 开发规范
+### Push schema changes without creating migration (for development)
+```bash
+npm run prisma:push
+```
 
-- 使用 TypeScript 进行类型安全开发
-- 遵循 ESLint 和 Prettier 代码规范
-- 使用 Tailwind CSS 进行样式开发
-- 遵循 Next.js App Router 最佳实践
-- 编写单元测试和属性测试
+### Format schema file
+```bash
+npx prisma format
+```
 
-## License
+### Validate schema
+```bash
+npx prisma validate
+```
 
-Private - All rights reserved
+## Database Schema Overview
+
+The schema includes the following models:
+
+- **User**: Customer and admin accounts
+- **Address**: Shipping addresses for users
+- **Product**: Product catalog with inventory
+- **ProductTranslation**: Multi-language product content
+- **Category**: Product categories with hierarchy
+- **CategoryTranslation**: Multi-language category content
+- **Cart**: Shopping carts for users and sessions
+- **CartItem**: Items in shopping carts
+- **Order**: Customer orders
+- **OrderItem**: Items in orders
+- **Review**: Product reviews by customers
+- **ShippingRate**: Shipping cost configuration
+
+## Troubleshooting
+
+### Connection Issues
+
+If you get connection errors:
+
+1. Verify PostgreSQL is running:
+   ```bash
+   # On Windows
+   pg_ctl status
+   
+   # On Linux/Mac
+   sudo systemctl status postgresql
+   ```
+
+2. Check your DATABASE_URL format
+3. Ensure the database exists:
+   ```sql
+   CREATE DATABASE mypilot;
+   ```
+
+### Migration Conflicts
+
+If you encounter migration conflicts:
+
+1. Check the migration history:
+   ```bash
+   npx prisma migrate status
+   ```
+
+2. Resolve conflicts manually or reset (development only):
+   ```bash
+   npx prisma migrate reset
+   ```
+
+### Schema Validation Errors
+
+If the schema has errors:
+
+1. Run validation:
+   ```bash
+   npx prisma validate
+   ```
+
+2. Format the schema:
+   ```bash
+   npx prisma format
+   ```
+
+## Next Steps
+
+After setting up the database:
+
+1. Run the application: `npm run dev`
+2. The Prisma Client will be available at `@/lib/prisma`
+3. Start implementing API routes using the Prisma Client
+
+## Additional Resources
+
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Prisma Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
+- [Prisma Client API](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference)
